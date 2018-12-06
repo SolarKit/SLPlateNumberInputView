@@ -24,7 +24,7 @@
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     
-    _background = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"plateNumberInput_background"]];
+    _background = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"key_white"]];
     [self.contentView addSubview:_background];
     
     _label = [[UILabel alloc] init];
@@ -160,7 +160,7 @@
     [self addSubview:self.collectionView];
     
     //indicator
-    self.indicator = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"plateNumberInput_indicator"]];
+    self.indicator = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"key_indicator"]];
     self.indicator.frame = CGRectMake(0, 0, _itemWidth+37, 3*_itemWidth);
     self.indicatorLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 12, CGRectGetWidth(self.indicator.frame), 30)];
     self.indicatorLabel.textAlignment = NSTextAlignmentCenter;
@@ -174,7 +174,7 @@
     self.deleteButton = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 2 * _itemWidth - kCollectionViewItemLeftPadding, self.frame.size.height - (_itemWidth * kCollectionViewItemRadio) - _itemLinePadding - bottomPadding - 1, 2 * _itemWidth, _itemWidth * kCollectionViewItemRadio)];
     self.deleteButton.layer.cornerRadius = 4.0f;
     self.deleteButton.layer.masksToBounds = YES;
-    [self.deleteButton setImage:[UIImage imageNamed:@"plateNumberInput_delete"] forState:UIControlStateNormal];
+    [self.deleteButton setImage:[UIImage imageNamed:@"keyboard_delete"] forState:UIControlStateNormal];
     [self.deleteButton setBackgroundImage:[self imageWithColor:[UIColor colorWithRed:0.68 green:0.70 blue:0.74 alpha:1.00] size:CGSizeMake(4, 4)] forState:UIControlStateNormal];
     [self.deleteButton setBackgroundImage:[self imageWithColor:[UIColor whiteColor] size:CGSizeMake(4, 4)] forState:UIControlStateHighlighted];
     [self.deleteButton addTarget:self action:@selector(deleteAction) forControlEvents:UIControlEventTouchUpInside];
