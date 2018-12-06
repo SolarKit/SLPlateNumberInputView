@@ -36,14 +36,22 @@
 - (void)plateNumberInputViewDidSelect:(SLPlateNumberInputView *)view inputString:(NSString *)inputString {
     self.tf.text = [self.tf.text stringByAppendingString:inputString];
     if (self.tf.text.length == 1) {
-        [view changeInputType:SLPlateNumberInputTypeCharacter];
+        view.alphabetOnly = YES;
+        view.inputType = SLPlateNumberInputTypeCharacter;
+    }else {
+        view.alphabetOnly = NO;
     }
 }
 
 - (void)plateNumberInputViewDidDelete:(SLPlateNumberInputView *)view {
     [self.tf deleteBackward];
     if (self.tf.text.length == 0) {
-        [view changeInputType:SLPlateNumberInputTypeProvince];
+        view.inputType = SLPlateNumberInputTypeProvince;
+    }
+    if (self.tf.text.length == 1) {
+        view.alphabetOnly = YES;
+    }else {
+        view.alphabetOnly = NO;
     }
 }
 
