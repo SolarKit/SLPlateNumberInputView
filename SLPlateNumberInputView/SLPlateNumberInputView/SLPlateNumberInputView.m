@@ -24,7 +24,7 @@
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     
-    _background = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"key_white"]];
+    _background = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"plateNumberInput_background"]];
     [self.contentView addSubview:_background];
     
     _label = [[UILabel alloc] init];
@@ -59,8 +59,6 @@
 @property (nonatomic, strong) NSArray *provinceArray;
 
 @property (nonatomic, strong) NSArray *characterArray;
-
-@property (nonatomic, readwrite, assign) SLPlateNumberInputType currentInputType;
 
 @end
 
@@ -162,7 +160,7 @@
     [self addSubview:self.collectionView];
     
     //indicator
-    self.indicator = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"key_indicator"]];
+    self.indicator = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"plateNumberInput_indicator"]];
     self.indicator.frame = CGRectMake(0, 0, _itemWidth+37, 3*_itemWidth);
     self.indicatorLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 12, CGRectGetWidth(self.indicator.frame), 30)];
     self.indicatorLabel.textAlignment = NSTextAlignmentCenter;
@@ -176,7 +174,7 @@
     self.deleteButton = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 2 * _itemWidth - kCollectionViewItemLeftPadding, self.frame.size.height - (_itemWidth * kCollectionViewItemRadio) - _itemLinePadding - bottomPadding - 1, 2 * _itemWidth, _itemWidth * kCollectionViewItemRadio)];
     self.deleteButton.layer.cornerRadius = 4.0f;
     self.deleteButton.layer.masksToBounds = YES;
-    [self.deleteButton setImage:[UIImage imageNamed:@"keyboard_delete"] forState:UIControlStateNormal];
+    [self.deleteButton setImage:[UIImage imageNamed:@"plateNumberInput_delete"] forState:UIControlStateNormal];
     [self.deleteButton setBackgroundImage:[self imageWithColor:[UIColor colorWithRed:0.68 green:0.70 blue:0.74 alpha:1.00] size:CGSizeMake(4, 4)] forState:UIControlStateNormal];
     [self.deleteButton setBackgroundImage:[self imageWithColor:[UIColor whiteColor] size:CGSizeMake(4, 4)] forState:UIControlStateHighlighted];
     [self.deleteButton addTarget:self action:@selector(deleteAction) forControlEvents:UIControlEventTouchUpInside];
@@ -195,17 +193,26 @@
     }
 }
 
-- (void)changeInputType:(SLPlateNumberInputType)type {
-    if (type != self.currentInputType) {
+- (void)setInputType:(SLPlateNumberInputType)inputType {
+    if (inputType != _inputType) {
         [self.collectionView reloadData];
     }
-    self.currentInputType = type;
+    _inputType = inputType;
+}
+
+- (void)setAlphabetOnly:(BOOL)alphabetOnly {
+    if (alphabetOnly != _alphabetOnly) {
+        [self.collectionView reloadData];
+    }
+    _alphabetOnly = alphabetOnly;
 }
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     _currentOpearteCell = [self cellForTouches:touches];
-    [self showIndicatorForCell:_currentOpearteCell];
-    [[UIDevice currentDevice] playInputClick];
+    if ([self cellTouchShouldBegin:_currentOpearteCell]) {
+        [self showIndicatorForCell:_currentOpearteCell];
+        //[[UIDevice currentDevice] playInputClick];
+    }
 }
 
 - (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
@@ -218,7 +225,7 @@
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     SLPlateNumberCell *cell = [self cellForTouches:touches];
-    if (cell) {
+    if (cell && [self cellTouchShouldBegin:cell]) {
         if ([self.delegate respondsToSelector:@selector(plateNumberInputViewDidSelect:inputString:)]) {
             [self.delegate plateNumberInputViewDidSelect:self inputString:cell.label.text];
         }
@@ -241,6 +248,20 @@
     return nil;
 }
 
+- (BOOL)cellTouchShouldBegin:(SLPlateNumberCell *)cell {
+    if (!cell) {
+        return NO;
+    }
+    NSString *text = cell.label.text;
+    if (_alphabetOnly && text.length > 0) {
+        unichar c = [text characterAtIndex:0];
+        if (!isalpha(c)) {
+            return NO;
+        }
+    }
+    return YES;
+}
+
 - (void)showIndicatorForCell:(SLPlateNumberCell *)cell {
     if (!cell) {
         return;
@@ -259,7 +280,7 @@
 }
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
-    if (self.currentInputType == SLPlateNumberInputTypeProvince) {
+    if (_inputType == SLPlateNumberInputTypeProvince) {
         return self.provinceArray.count;
     }else {
         return self.characterArray.count;
@@ -267,7 +288,7 @@
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    if (self.currentInputType == SLPlateNumberInputTypeProvince) {
+    if (_inputType == SLPlateNumberInputTypeProvince) {
         return [self.provinceArray[section] count];
     }else {
         return [self.characterArray[section] count];
@@ -276,16 +297,22 @@
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     SLPlateNumberCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"SLPlateNumberCell" forIndexPath:indexPath];
-    if (self.currentInputType == SLPlateNumberInputTypeProvince) {
+    cell.label.textColor = [UIColor blackColor];
+    
+    if (_inputType == SLPlateNumberInputTypeProvince) {
         cell.label.text = self.provinceArray[indexPath.section][indexPath.row];
     }else {
         cell.label.text = self.characterArray[indexPath.section][indexPath.row];
+        if (![self cellTouchShouldBegin:cell]) {
+            cell.label.textColor = [UIColor lightGrayColor];
+        }
     }
+    
     return cell;
 }
 
 -(UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
-    if (self.currentInputType == SLPlateNumberInputTypeProvince) {
+    if (_inputType == SLPlateNumberInputTypeProvince) {
         NSInteger nums = [self.provinceArray[section] count];
         CGFloat padding = ([UIScreen mainScreen].bounds.size.width - nums * _itemWidth - ((nums - 1) * kCollectionViewItemLeftPadding)) / 2.0;
         padding = CGFloatPixelRound(padding);
