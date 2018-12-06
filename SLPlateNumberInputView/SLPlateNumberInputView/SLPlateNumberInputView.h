@@ -31,9 +31,9 @@ typedef NS_ENUM(NSInteger, SLPlateNumberInputType)
 
 @property (nonatomic, weak) id<SLPlateNumberInputViewDelegate> delegate;
 
-@property (nonatomic, readonly, assign) SLPlateNumberInputType currentInputType;
+@property (nonatomic, assign) SLPlateNumberInputType inputType;
 
-- (void)changeInputType:(SLPlateNumberInputType)type;
+@property (nonatomic, assign) BOOL alphabetOnly;
 
 - (instancetype)init;
 
